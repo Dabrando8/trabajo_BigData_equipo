@@ -1,0 +1,26 @@
+---
+title: Análisis económico y demográfico de España. Retos para los jóvenes españoles
+image: imagenes/espana.jpeg
+about: 
+  template: trestles
+  image-width: 16em
+  image-shape: rectangle
+  links:
+    - icon: envelope
+      text: e-mail
+      url: "mailto:<dabase@alumni.uv.es>"           
+    - icon: github
+      text: Github
+      href: https://github.com/<Dabrando8>         
+---
+        
+Hola, somos David Bayot (dabase@alumni.uv.es), Javier Mascarell (jamasga@alumni.uv.es) y Carlos Vicedo (carvial2@alumni.uv.es)
+      
+Esta web sirve para presentar el trabajo en equipo para la asignatura "Programación y manejo de datos en la era Del Big Data", optativa de GECO en la Facultad de Economía de la Universitat de València.
+
+La web de la asignatura está [aquí](https://perezp44.github.io/intro-ds-23-24-web/){target="_blank"} y los trabajos de mis compañeros de curso puedes verlos [aquí](https://perezp44.github.io/intro-ds-23-24-web/05-trabajos-estudiantes.html){target="_blank"}.
+
+
+Nuestro trabajo lleva por título : "Análisis económico y demográfico de España. Retos para los jóvenes españoles". El objetivo es analizar algunas de las variables económicas y demográficas del país y ver cómo afecta este contexto a los jóvenes. 
+
+El trabajo puede verse [aquí](my_trabajo_BigData.html), y las slides [aquí](my_slides_BigData.html){target="_blank"}.

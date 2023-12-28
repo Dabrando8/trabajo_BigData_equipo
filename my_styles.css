@@ -1,0 +1,41 @@
+/* css styles */
+
+
+/* justificar el texto */ 
+p, ul, ol {
+  text-align: justify; }    
+  
+  
+.rojo {
+  color: red;
+}
+
+.pink-background {
+  background-color: pink;
+}
+
+.importante {
+  color: red;
+  background-color: yellow;
+}
+
+h1 {
+    font-size: 32px; /* Tamaño para títulos de primer nivel (#) */
+}
+
+h2 {
+    font-size: 20px; /* Tamaño para títulos de segundo nivel (##) */
+}
+
+h3 {
+    font-size: 14px; /* Tamaño para títulos de tercer nivel (###) */
+}
+
+.toc .toc-level {
+    color: #B98034; 
+}
+
+/* Cambiar el color del texto en los tabsets */
+.nav-tabs .nav-link {
+    color: #B98034; 
+}

@@ -1,0 +1,81 @@
+project:                
+  type: website          
+  output-dir: docs       
+  
+website:
+  title: "Análisis económico y demográfico de España. Retos para los jóvenes españoles"            
+  favicon: "imagenes/espana.jpeg"     
+  search:   
+    location: navbar
+    type: overlay   
+    copy-button: true
+  navbar:
+    logo: "imagenes/espana.jpeg"          #---
+    background: "#B98034"    #- color de la navbar
+    foreground: "#FBF8E7"    #- color navigation elements, text and links that appear in the navbar.
+    left: 
+      - icon: house-door
+        href: index.html
+    right:
+      - text: "Trabajo en equipo"   #---
+        href: my_trabajo_BigData.qmd   
+      - text: "Slides"
+        href: my_slides_BigData.qmd
+        target: _blank
+      - icon: github
+        href: https://github.com/<Dabrando8>   
+      - icon: envelope
+        url: "mailto:<dabase@alumni.uv.es>"        
+  page-footer:
+    border: true
+    background: "#FF8300"       
+    left: "© 2023 David Bayot, Javier Mascarell y Carlos Vicedo"   
+    center: "Hecho con [Quarto](https://quarto.org)"
+    right:
+      - icon: github
+        href: https://github.com/<dabrando8>     
+      - icon: envelope
+        url: "mailto:<dabase>@alumni.uv.es"         
+    
+format:
+  html:
+    theme: flatly           #- https://quarto.org/docs/output-formats/html-themes.html
+    mainfont: Lato
+    highlight-style: a11y   #-
+    css: my_styles.css      #- si queréis añadir cosas
+    page-layout: full
+    toc: true
+    toc-location: right
+    toc-title: "Índice"
+    code-copy: true
+    code-overflow: wrap    
+    code-fold: true
+    code-line-numbers: true
+
+# Enable CC licence appendix
+#license: "CC BY"
+
+lang: es  
+
+# Default execute options
+execute:
+  echo: true
+  message: false
+  warning: false
+  eval: true
+  #fig-align: center
+  #freeze: true  #- des-comentar cuando estéis tuneando el blog
+                 #- https://quarto.org/docs/projects/code-execution.html#freeze
+    
+
+#- Default knitr options
+knitr:
+  opts_chunk: 
+    collapse: true
+    comment: "#>" 
+    fig.asp:  7/9
+    out.width: "95%"
+    fig.align: "center"
+    fig.show: "hold"
+    R.options:
+      options(scipen = 999) #- para quitar la notación científica  

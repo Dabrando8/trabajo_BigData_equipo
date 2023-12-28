@@ -1,0 +1,1440 @@
+---
+title: "Análisis económico y demográfico de España. Retos para los jóvenes españoles"
+description: |
+ 
+author:   
+  - David Bayot (dabase@alumni.uv.es)\n   
+  - Javier Mascarell (jamasga@alumni.uv.es)\n
+  - Carlos Vicedo (carvial2@alumni.uv.es)
+date: 2023-12-20                      #--
+categories: [trabajo BigData]      #--
+image: "imagenes/espana.jpeg"  #- Cambiar imagen
+title-block-banner: true #- {true, false, "green","#AA0000"}
+title-block-banner-color: "FBF8E7"    #-"#FFFFFF" 
+toc-depth: 3
+smooth-scroll: true
+format: 
+  html:
+    backgroundcolor: "#FAFBEC"
+    embed-resources: true
+    link-external-newwindow: true
+    css: "trabajo_BigData_equipo-main/my_styles.css"   #- CUIDADO!!!!
+code-tools: true
+code-link: true
+---
+
+# 1.Introducción
+
+En este trabajo primero observaremos algunas variables macroeconómicas de España para situar al país en contexto. Después, veremos distintos datos demográficos para realizar algunas proyecciones a futuro sobre trabajo y estudios.
+
+# 2.Datos 
+
+::: {.panel-tabset}
+
+## Acerca de los datos
+
+La mayoría de datos que hemos utilizado son del [INE](https://www.ine.es/dyngs/INEbase/listaoperaciones.htm){target="_blank"}, y unos poco del [FRED](https://fred.stlouisfed.org/){target="_blank"}. Respecto al formato de los datos, algunos de los que hemos utilizado están en excel, aunque muchos de ellos los hemos descargado en formato px . 
+
+## Código de los datos
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+# A continuación se muestran todos los paquetes utilizados para la realización del trabajo
+
+library(tidyverse)
+library(pxR)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(gganimate)
+library(readxl)
+library(sf) 
+library(ggthemes)
+library(plotly)
+library(viridis)
+library(gganimate)
+library(treemap)
+library(treemapify) 
+library(RColorBrewer)
+library(stringr)
+library(ggrepel)
+library(purrr)
+library(flexdashboard)
+library(vembedr) 
+
+# Ahora cargamos los datos necesarios y los transformamos a dataframes
+
+Demografia_edad_sexo <- read.px("datos/Demografia_edad_sexo.px") %>% as.data.frame()
+Demografia_provincias <- read.px("datos/Demografia_provincias.px") %>% as.data.frame()
+Epa_Paro_comunidades <- read.px("datos/Epa_Paro_comunidades.px") %>% as.data.frame()
+Epa_Paro_provincias <- read.px("datos/Epa_Paro_provincias.px") %>% as.data.frame()
+Graduados_en_2019_de_graduados_en_2014 <- read.px("datos/Graduados_en_2019_de_graduados_en_2014.px") %>% as.data.frame()
+Inflacion_mensual <- read_excel("datos/Inflacion_mensual.xlsx") %>% as.data.frame()
+Insercion_en_2019_de_graduasos_en_2014 <- read.px("datos/Insercion_en_2019_de_graduados_en_2014.px") %>% as.data.frame()
+Insercion_laboral <- read.px("datos/Insercion_laboral.px") %>% as.data.frame()
+IPC_por_sectores <- read.px("datos/IPC_por_sectores.px") %>% as.data.frame()
+IPC_vivienda <- read.px("datos/IPC_vivienda.px") %>% as.data.frame()
+Proyeccion_demografia <- read.px("datos/Proyeccion_demografia.px") %>% as.data.frame()
+Renta_media <- read.px("datos/Renta_media.px") %>% as.data.frame()
+Sin_hogar <- read.px("datos/Sin_hogar.px") %>% as.data.frame()
+pib <- read_excel("datos/pib.xls") %>% as.data.frame()
+pib_ccaa <- read_excel("datos/pib_ccaa.xls") %>% as.data.frame()
+pib_ccaa_top5 <- read_excel("datos/pib_ccaa_top5.xls") %>% as.data.frame()
+poblacion <- read_excel("datos/poblacion .xls") %>% as.data.frame()
+poblacion_ccaa <- read_excel("datos/poblacion_ccaa.xls") %>% as.data.frame()
+poblacion_inmigrante <- read_excel("datos/poblacion_inmigrante.xls") %>% as.data.frame()
+```
+:::
+
+---
+
+# 3.Variables económicas
+
+Empezaremos poniendo a España en su contexto económico.
+
+## 3.1.PIB de España
+
+La primera variable económica a tratar será el PIB nominal de la nación. Podemos observar una tendencia creciente desde el 1995 hasta el 2008, momento en el que comienza la financiera a raiz del sobreendeudamiento del sector privado en los años previos. La recuperación económica no se vislumbra hasta principios del 2014, una recuperación basada en mayor grado en el crecimiento poblacional que en el incremento de la productividad. Por último, la crisis del Coronavirus incidió de forma significativa en la riqueza de la nación, dando lugar a una caída de la actividad económica que, sin embargo, se recuperó en pocos años.  
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+ruta_archivo <- "./datos/pib.xls"
+df_PIB <- read_excel(ruta_archivo)
+
+ggplot(data = df_PIB, aes(x = Fecha, y = pib)) +
+  geom_line(color = "blue", size = 2) +
+  labs(x = "Año", y = "PIB(en millones)", title = "Producto Interior Bruto España (1995-2020)",
+       caption = "Elaboración propia a partir de datos del INE") +
+  theme_economist() +
+  annotate("rect",
+           xmin = as.POSIXct("2008-01-01"), 
+           xmax = as.POSIXct("2014-01-01"),  
+           ymin = -Inf,
+           ymax = Inf,
+           alpha = 0.2,
+           fill = "red") +
+  annotate(geom = "text",
+           x = as.POSIXct("2011-01-01"),  
+           y = 1200000,  
+           label = "Crisis inmobiliaria",
+           size = 5) +
+  annotate("rect",
+           xmin = as.POSIXct("2019-01-01"), 
+           xmax = as.POSIXct("2022-01-01"),  
+           ymin = -Inf,
+           ymax = Inf,
+           alpha = 0.2,
+           fill = "red")+
+  annotate(geom = "text",
+           x = as.POSIXct("2019-01-01"),  
+           y = 1300000,  
+           label = "Crisis Coronavirus",
+           size = 5) +
+  coord_cartesian(xlim = as.POSIXct(c("1995-01-01", "2023-01-01")),   
+                  ylim = c(600000, 1400000))  
+```
+
+## 3.2.PIB top 5 CCAA
+
+Los dos siguientes gráficos vienen a mostrar lo mismo: el PIB de cada una de las comunidades autónomas del país. La creación de dos gráficos obedece a una evidéncia empirica: la gran disparidad poblacional entre las diversas regiones, lo cual impedía el visualizar correctamente los datos de las regiones más pequeñas (en términos poblacionales).
+
+En el primer grafico, podemos observar la evolución económica de las 5 regiones más ricas de España: Cataluña, Madrid, Andalucía, Comunitat Valenciana y País Vasco. En conjunto conforman un gráfico un tanto anodino por la similitud en el esdevenir económico del conjunto de regiones españolas. Este hecho se debe, sin ninguna duda, a que todas las CCAA tienen una configuración sectorial muy parecida y, además, son interdependientes entre sí por pertenecer todas a un mismo estado. Los shock que afrontan las distintas regiones son los mismos y sus efectos, también.
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+ruta_archivo <- "./datos/pib_ccaa_top5.xls"
+df_PIB_CCAA_TOP5 <- read_excel(ruta_archivo)
+df_PIB_CCAA_TOP5 <- na.omit(df_PIB_CCAA_TOP5)
+
+
+df_PIB_CCAA_TOP5<- df_PIB_CCAA_TOP5 %>% 
+  pivot_longer(cols = 2:7, names_to = "Fecha")
+
+df_PIB_CCAA_TOP5$Comunidad_Autonoma <- as.factor(df_PIB_CCAA_TOP5$Comunidad_Autonoma)
+
+grafico_3<-ggplot(data = df_PIB_CCAA_TOP5, aes(x = Fecha, y = value, color = Comunidad_Autonoma, group = Comunidad_Autonoma)) +
+  geom_line(size = 1) +
+  labs(x = "Año", y = "PIB(en miles)", 
+       title = "Producto Interior por CCAA (2016-2021)",
+       caption = "Elaboración propia a partir de datos del INE") +
+  theme_solarized_2()+theme(legend.position = "none")+scale_y_continuous(labels = scales::comma)
+
+ggplotly(grafico_3)
+
+```
+
+## 3.3.PIB resto CCAA
+
+Si observamos el "furgon de cola" autonómico, podremos detectar dos excepciones a la afirmación anunciada anteriormente: las Islas Canarias y les Illes Balears. Ambos archipiélagos tienen en común el tener una gran dependencia del turismo. Es, por lo tanto, entendible que estas regiones hayan experimentado una caida transitoria del PIB mayor. 
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+ruta_archivo <- "./datos/pib_ccaa.xls"
+df_PIB_CCAA <- read_excel(ruta_archivo)
+df_PIB_CCAA <- na.omit(df_PIB_CCAA)
+
+
+df_PIB_CCAA<- df_PIB_CCAA %>% 
+  pivot_longer(cols = 2:7, names_to = "Fecha")
+
+df_PIB_CCAA$Comunidad_Autonoma <- as.factor(df_PIB_CCAA$Comunidad_Autonoma)
+
+grafico_2<-ggplot(data = df_PIB_CCAA, aes(x = Fecha, y = value, color = Comunidad_Autonoma, group = Comunidad_Autonoma)) +
+  geom_line(size = 1) +
+  labs(x = NULL, y = "PIB(en miles)", 
+       title = "Producto Interior por CCAA (2016-2021)",
+       caption = "Elaboración propia a partir de datos del INE") +
+  theme_solarized_2()+theme(legend.position = "none")+scale_y_continuous(labels = scales::comma)
+
+ggplotly(grafico_2)
+```
+
+::: {.panel-tabset}
+
+## Renta media por comunidades 
+
+Ahora vamos a ver la renta media por comunidades. Al usar la medida per cápita, el orden de las comunidades mejor posicionadas cambia. El orden varía, y Andaluciía deja de estar presente en el top.
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_Renta_media <- Renta_media %>%
+  drop_na() %>%
+  rename(Comunidad = Unidades.territoriales, rentamedia = value) %>%
+  arrange(desc(Periodo)) %>%
+  filter(Indicadores.de.renta.media == "Renta neta media por persona") %>%
+  filter(Comunidad %in% c("Andalucía", "Aragón", "Asturrias, Principado de", "Balears, Illes", "Canarias", "Cantabria", "Castilla y León", "Castilla - La Mancha", "Cataluña", "Comunitat Valenciana", "Extremadura", "Galicia", "Madrid, Comunidad de", "Murcia, Región de", "Navarra, Comunidad Foral de", "País Vasco", "Rioja, La", "Ceuta", "Melilla"))
+
+df_Renta_media$Periodo <- factor(df_Renta_media$Periodo, levels = sort(unique(df_Renta_media$Periodo), decreasing = TRUE))
+
+grafo1 <- df_Renta_media %>%
+  ggplot(aes(x=Periodo, y=rentamedia, group=Comunidad, color=Comunidad)) +
+    geom_line() +
+  labs(x = NULL, y = "Valor en euros", 
+       title = "Renta media por CCAA (2016-2021)") +
+    theme_solarized() 
+ggplotly(grafo1)
+
+```
+
+## Comunidades de mayor renta media en 2021
+
+En forma de gráfico de barras puede ser un poco difícil discernir cuál es la comunidad autónoma con mayor renta media.
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_top_renta_media <- df_Renta_media %>%
+  filter(Periodo == "2021") %>%
+  slice_max(rentamedia, n = 5) 
+
+grafo2 <- df_top_renta_media %>%
+ggplot(aes(x=Comunidad, y=rentamedia, group=Comunidad, color=Comunidad)) +
+  labs(x = NULL, y = "Renta media en euros", 
+       title = "5 mayores comunidades autónomas por renta media en euros") +
+  geom_bar(stat = "identity") +
+  theme_clean() 
+ggplotly(grafo2)
+
+```
+
+## Comunidades de mayor renta media en 2021 (minimalista)
+
+Esta representación más simple mediante puntos permite ver claramente que el País Vasco ocupa el primer puesto.
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_top_renta_media <- df_Renta_media %>%
+  filter(Periodo == "2021") %>%
+  slice_max(rentamedia, n = 5) 
+
+grafo2 <- df_top_renta_media %>%
+ggplot(aes(x=Periodo, y=rentamedia, group=Comunidad, color=Comunidad)) +
+  labs(x = NULL, y = "Renta media en euros", 
+       title = "5 mayores comunidades autónomas por renta media en euros") +
+  geom_point() +
+  theme_clean() 
+ggplotly(grafo2)
+
+```
+
+:::
+
+# 4.Evolución del precio de la vivienda en España
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+IPC_vivienda <- read.px("datos/IPC_vivienda.px") %>% as.data.frame()
+
+
+### CORRECTO
+
+df_vivienda <- IPC_vivienda %>%
+  filter(Comunidades.y.Ciudades.Autónomas == "Nacional",
+         Índices.y.tasas %in% c("Índice", "Variación anual"),
+         General..vivienda.nueva.y.de.segunda.mano %in% c("Vivienda nueva", "Vivienda segunda mano")) %>%
+  mutate(Anio = as.numeric(str_sub(Periodo, 1, 4)), # Extraer el año
+         Trimestre = as.numeric(str_sub(Periodo, 6, 6)), # Extraer el trimestre
+         MesInicio = case_when(
+           Trimestre == 1 ~ 1,
+           Trimestre == 2 ~ 4,
+           Trimestre == 3 ~ 7,
+           Trimestre == 4 ~ 10
+         ),
+         Fecha = as.Date(paste(Anio, MesInicio, "01", sep = "-"))) %>% 
+
+arrange(Fecha) 
+
+gr_vivienda <- ggplot(df_vivienda, aes(x = Fecha, y = value, 
+                             group = interaction(Índices.y.tasas, General..vivienda.nueva.y.de.segunda.mano), 
+                             color = interaction(Índices.y.tasas, General..vivienda.nueva.y.de.segunda.mano))) +
+  geom_line() +
+  theme_minimal() +
+  labs(title = "Indice de precios de la vivienda en España",
+       x = "Fecha",
+       y = "Valor del Índice (Base 2015)",
+       color = "Guía") +
+  scale_y_continuous(sec.axis = sec_axis(~ ., name = "Variación anual en %")) +
+  scale_color_manual(values = c("red", "green", "blue", "brown"), 
+                     labels = c("Índice (V. Nueva)", "△% (V. Nueva)", "Índice (2ª Mano)", "△% (2ª Mano)"))  
+
+gr_vivienda <- gr_vivienda + 
+  theme(legend.position = c(0.5, 0.37),  # Coloca la leyenda en la parte superior
+        legend.background = element_rect(fill = "#EAF2F8",
+                                         size = 0.2,
+                                         linetype = "solid",
+                                         colour = "darkblue"))
+
+
+```
+
+::: panel-tabset
+
+### Resultados
+
+::: columns
+::: {.column width="50%"}
+### ¿Que hay detras del mito?
+
+En este gráfico animado podemos ver la evolución del precio en las líneas superiores correspondientes a la vivienda nueva y a la vivienda de segunda mano en España. Contrariamente a lo que mucha gente piensa, en 2022 aún no se habían superado los precios registrados durante la burbuja inmobiliaria (hablando en términos nominales). Por lo tanto, tras descontar la inflación, observaríamos que los precios reales son muy inferiores a los de 2007. Si nos fijamos en las líneas de abajo, que reflejan las variaciones porcentuales, podremos contemplar cómo la mayor volatilidad se produce tras la crisis con un fuerte descenso, mientras que después de 2012, el precio empieza a estabilizarse con una subida ininterrumpida desde entonces.
+
+Si bien hay que considerar que los precios de la vivienda son muy elevados en España en comparación con el salario medio, este gráfico permite desmentir muchos mitos y nos obliga a buscar las causas de la dificultad para acceder a la vivienda en otros factores, ya que el precio de la vivienda solo parece reflejar el efecto de otras causas. Estos motivos podrían ser la dificultad de emancipación de los jóvenes por la falta de oportunidades en el mercado laboral, la escasez de oferta en lugares concretos como grandes ciudades, el endurecimiento en el acceso hipotecario, el estancamiento de los salarios, el aumento de la competencia internacional, la falta de productividad, o la disminución o falta de riqueza real (no todo es el salario; también hay que contemplar el ahorro y el gasto).
+:::
+
+::: {.column width="50%"}
+```{r, fig.width=4, fig.height=8}
+#| code-fold: true
+#| warning: false
+
+# Añadir animación
+gr_vivienda_anim <- animacion <- gr_vivienda + transition_reveal(Fecha)
+gr_vivienda_anim
+
+```
+:::
+:::
+
+### Procedimiento
+
+::: columns
+::: {.column width="50%"}
+Para poder obtener el gráfico interactivo en este caso, hemos tenido que crear tres columnas nuevas: una con los años, otra con los trimestres y una última con el mes de inicio. Esto facilita la transformación de los datos a formato de fecha.
+
+Para hacer el gráfico con ggplot, hemos utilizado en las funciones 'group' y 'color' la función 'interaction' para poder obtener una serie de datos agrupada según una combinación de dos datos de diferentes columnas. Después, hemos aplicado el mismo método para el color. Para mostrar un eje vertical secundario en el lado derecho, hemos utilizado 'scale_y_continuous(sec.axis = sec_axis..)' y, para cambiar la leyenda de la guía, 'scale_color_manual(labels)'. Además, hemos modificado el fondo de la leyenda y creado el gráfico animado.
+:::
+
+::: {.column width="50%"}
+```{r, fig.width=4, fig.height=8}
+#| code-fold: true
+#| warning: false
+
+# Añadir animación
+gr_vivienda_anim <- animacion <- gr_vivienda + transition_reveal(Fecha)
+gr_vivienda_anim
+
+```
+:::
+:::
+:::
+
+## 4.1.Comparativa de la △% de la vivienda entre CCAA (2007-2022)
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+IPC_vivienda <- read.px("datos/IPC_vivienda.px") %>% as.data.frame()
+
+## TREEMAPS
+
+df_vivienda_T4 <- IPC_vivienda %>%
+  filter(Índices.y.tasas == "Variación anual",
+         General..vivienda.nueva.y.de.segunda.mano == "General",
+         str_detect(Periodo, "T4"))
+  
+resultado_viv <- df_vivienda_T4 %>%
+  group_by(Comunidades.y.Ciudades.Autónomas) %>%
+  do(Suma_de_Value = sum(.$value, na.rm = TRUE)) %>%
+  ungroup()
+
+#ELIMINA LOS NUMERO DE COMUNIDADES
+resultado_viv <- resultado_viv %>%
+  mutate(Comunidades.y.Ciudades.Autónomas = gsub("^\\d+\\s+", "", Comunidades.y.Ciudades.Autónomas))
+
+resultado_viv$Suma_de_Value <- as.numeric(resultado_viv$Suma_de_Value)
+
+# DataFrame con Suma de Value positivos
+df_positivos_viv <- resultado_viv %>%
+  filter(Suma_de_Value > 0)
+
+# DataFrame con Suma de Value negativos
+df_negativos_viv <- resultado_viv %>%
+  filter(Suma_de_Value < 0)
+
+## HAY QUE CONSIDERAR QUE CATALUÑA ES MUY GRANDE ENTONCES PUEDE QUE EN BARCELONA SI HAYAN AUMENTOS MUY ELEVADOS, MIENTRAS QUE EN LAS ZONAS RURALES HAYAN GRANDES DESCENSOS
+
+##Nueva columna con logaritmos para reducir las diferencias de los bloques
+df_positivos_viv <- df_positivos_viv %>%
+  mutate(Suma_de_Value_Log = log1p(Suma_de_Value))  # Logaritmo natural más 1 para evitar log(0)
+
+##Debemos transformarlos a positivos ya que hay que hacer logaritmos
+df_negativos_viv <- df_negativos_viv %>%
+  mutate(Suma_de_Value = ifelse(Suma_de_Value < 0, abs(Suma_de_Value), Suma_de_Value))
+
+##Nueva columna con logaritmos para reducir las diferencias de los bloques
+df_negativos_viv <- df_negativos_viv %>%
+  mutate(Suma_de_Value_Log = log1p(Suma_de_Value)) 
+
+p_viv_positive <- ggplot(df_positivos_viv, aes(area = Suma_de_Value_Log, label = paste(Comunidades.y.Ciudades.Autónomas, Suma_de_Value, sep = "\n"))) +
+  geom_treemap(fill = "green", colour = "black", size = 1.5) +
+  geom_treemap_text(colour = "black", place = "centre", size = 10) +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2)) +
+  coord_fixed(ratio = 0.7)# Agregar un borde alrededor del gráfico
+
+p_viv_negative <- ggplot(df_negativos_viv, aes(area = Suma_de_Value_Log, label = paste(Comunidades.y.Ciudades.Autónomas, paste0("-", Suma_de_Value), sep = "\n"))) +
+  geom_treemap(fill = "red", colour = "black", size = 1.5) +  
+  geom_treemap_text(colour = "black", place = "centre", size = 10) +
+  theme(panel.border = element_rect(color = "black", fill = NA, size = 2)) +
+  coord_fixed(ratio = 0.7)
+
+```
+
+::: panel-tabset
+### △% positiva y negativa del P(€) Vivienda por CC.AA.
+
+```{r}
+#| code-fold: true
+#| warning: false  
+#| column: screen-inset-shaded
+#| layout-nrow: 1
+
+plot(p_viv_positive) 
+
+plot(p_viv_negative)
+
+```
+
+### Procedimiento
+
+Para realizar este Treemap, hemos tenido que filtrar los datos que nos convenían para facilitar el manejo de los df's. En este caso concreto, hemos considerado todas las viviendas, la variación anual y únicamente los T4 (cuartos trimestres). Posteriormente, agrupamos por Comunidades y realizamos la suma de los valores para obtener la variación acumulada durante todos los años. Sin embargo, tuvimos que eliminar los años que acompañaban a T4 para continuar.
+
+Una vez obtenido, dividimos el df en dos distintos: uno para los valores positivos y otro para los negativos. Para que los cuadros no se vieran muy contrastados entre sí y se apreciaran las pequeñas variaciones, cambiamos la escala a logarítmica, creando una nueva columna con los valores en logaritmo. Aquí tuvimos un ligero problema, ya que para cambiar a logaritmo tuvimos que convertir los valores negativos en positivos.
+
+Sobre los Treemaps, es importante mencionar que cambiamos la proporción del rectángulo. Utilizamos la función 'paste' de 'label' con ='barra + n' para poder mostrar tanto la comunidad como el valor en los bloques. Además, tuvimos que añadir un guion en 'label' a los valores que estaban positivos pero que queríamos mostrar como negativos.
+
+Para poder colocar los dos juntos en la página web, utilizamos '#\| column: screen-inset-shaded' y abajo '#\| layout-nrow: 1' antes de escribir el código.
+:::
+
+En estos Treemaps, podemos observar la variación total acumulada desde el cuarto trimestre de 2007 hasta el cuarto trimestre de 2022 en el precio medio de todas las viviendas (tanto nuevas como de segunda mano) vendidas a lo largo de estos últimos años en las diferentes Comunidades Autónomas de nuestro país. Hay varios hechos a considerar para poder analizar los cuadros con una perspectiva adecuada. El primero es que en 2007, el precio de la vivienda había experimentado una fuerte subida respecto a los años anteriores, encontrándose en plena burbuja inmobiliaria. Por lo tanto, no es sorprendente que en muchos territorios el precio haya sufrido grandes reducciones en promedio desde entonces, algo que debería considerar cualquier persona con expectativas de invertir a medio plazo en este sector. Otro hecho que debemos tener en cuenta es que no estamos hablando únicamente de las ciudades; también forman parte de las Comunidades Autónomas muchos territorios rurales. Un caso destacado es el de Cataluña, donde Barcelona probablemente sea uno de los municipios con mayores aumentos en el precio. Sin embargo, este incremento queda más que compensado por las reducciones en otros pueblos menos habitados.
+
+
+
+
+# 5.Sintecho
+
+Si nos detenemos a observar las causas del sinhogarismo en España, vemos que la principal causa después de tener que empezar de 0 tras emigrar es la pérdida de empleo.
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_sin_hogar <- Sin_hogar %>%
+  drop_na() %>%
+  rename(ccaa = Comunidades.y.Ciudades.Autónomas.de.ubicación.del.centro, motivo = Razones.para.abandonar.el.alojamiento) %>%
+  filter(ccaa == "Total Nacional") 
+
+grafo3 <- df_sin_hogar %>%
+    arrange(value) %>%
+    ggplot( aes(x=motivo, y=value) ) +
+      geom_bar(stat="identity", fill="#69b3a2") +
+      coord_flip() +
+      theme_solarized_2() +
+      theme(
+        panel.grid.minor.y = element_blank(),
+        panel.grid.major.y = element_blank(),
+        legend.position="none"
+      ) +
+      xlab("") +
+      ylab("Porcentaje") 
+ggplotly(grafo3)
+
+```
+
+# 6.Desempleo
+
+## 6.1.Desempleo por CCAA
+
+Y relacionado con lo anterior, tenemos aquí el desempleo por comunidades
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_paro_ccaa <- Epa_Paro_comunidades %>%
+  filter(Edad == "Total", Sexo == "Ambos sexos", Comunidades.y.Ciudades.Autónomas != "Total Nacional") 
+
+grafo4 <- ggplot(df_paro_ccaa, aes(x = Comunidades.y.Ciudades.Autónomas, y = value, fill = Comunidades.y.Ciudades.Autónomas)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Desempleo por Comunidades Autónomas",
+    x = "CA",
+    y = "Desempleo",
+    fill = "CA"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(size = 10),
+    axis.line = element_line(color = "black")
+  ) 
+ggplotly(grafo4)
+
+
+```
+
+## 6.2.Desempleo por edad
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_paro_edad <- Epa_Paro_comunidades %>%
+  select(Edad, Sexo, value) %>%
+  filter(Sexo == "Ambos sexos", Edad != "Total")
+
+grafo5 <- ggplot(df_paro_edad, aes(x = Edad, y = value, fill =Edad)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Desempleo por Edad",
+    x = "Intervalo de edad",
+    y = "Desempleo",
+    fill = "Edad"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold"),
+    axis.text = element_text(size = 10),
+    axis.line = element_line(color = "black")
+  ) 
+ggplotly(grafo5)
+
+```
+
+## 6.3.Desempleo por sexo
+
+Ahora vamos a ver el pero comparando por sexos
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_paro_sexo <- Epa_Paro_comunidades %>%
+  select(Sexo, value) %>%
+  filter(Sexo != "Ambos sexos")
+
+grafo6 <- ggplot(df_paro_sexo, aes(x = Sexo, y = value)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Desempleo por sexo",
+    x = "Sexo",
+    y = "Desempleo",
+    fill = "Sexo"
+  ) +
+  theme_minimal() 
+ggplotly(grafo6)
+
+
+```
+
+# 7.Demografía
+
+Ahora vamos a ver algunos datos demográficos 
+
+## 7.1.Población inmigrante por origen
+
+En el siguiente gráfico podemos observar la evolución de la población inmigrante residente en españa según su región de origen. Por compactarlo lo máximo posible, se han utilizado las regiones supranacionales que brinda el INE para esta cuestión. 
+Podemos observar que el grupo más numeroso en términos demográficos es el de nacidos en otros países de la UE. Este grupo creció hasta, aproximadamente, el comienzo de la recesión a raíz de la crisis del 2008. Hasta el 2012 se matuvo estable y, a continuación,  hasta 2019 experimentó un ligero descenso. En 2014 se produjo el "sorpasso" de la población africana a la sudamericana aunque, si observamos la tendencia de crecimiento de cada grupo, parece que no en mucho tardar, los sudamericanos se coronarán como el segundo grupo más numeroso. 
+
+El segundo y tercer grupo más numeroso, respectivamente, es el de sudamericanos y africanos. Podemos observar en ambos casos un comportamiento procíclico, siendo el de los sudamericanos más notable. 
+
+El cuarto y tercer grupo están conformados, respectivamente, por asiáticos y caribeños. Ambas poblaciones experimentan un crecimiento continuo y estable en los últimos años. 
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+ruta_archivo <- "./datos/poblacion_inmigrante.xls"
+df_poblacion_inmigrante <- read_excel(ruta_archivo)
+
+df_poblacion_inmigrante<- df_poblacion_inmigrante %>% 
+  pivot_longer(cols = 2:21, names_to = "fecha")
+
+grafico_4<-ggplot(data = df_poblacion_inmigrante, aes(x = fecha, y = value, color = origen, group = origen)) +
+  geom_line(size = 1) +
+  labs(x = "Año", y = NULL, 
+       title = "Población inmigrante por procedencia",
+       caption = "Elaboración propia a partir de datos del INE") +
+  theme_solarized_2()+theme(legend.position = "none")
+
+ggplotly(grafico_4)
+
+```
+
+## 7.2.Población por CCAA
+
+A continuación, tenemos un gráfico de barras 
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+ruta_archivo<-"./datos/poblacion_ccaa.xls"
+df_poblacion_ccaa<-read_excel(ruta_archivo)
+
+orden_columnas <- c(1, order(names(df_poblacion_ccaa)[-1]) + 1)
+
+df_poblacion_ccaa <- df_poblacion_ccaa[, orden_columnas]
+
+df_poblacion_ccaa<- df_poblacion_ccaa %>% 
+  pivot_longer(cols = 2:26, names_to = "fecha")
+
+df_poblacion_ccaa <- df_poblacion_ccaa[order(-df_poblacion_ccaa$value), ]
+
+grafico_5 <- ggplot(df_poblacion_ccaa, aes(x = reorder(CCAA, -value), y = value)) +
+  geom_bar(stat = "identity", fill = "darkcyan") +
+  labs(title = "Población por Comunidad Autónoma", x = "Comunidad Autónoma", y = "Población") +
+  theme_solarized() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "none")+scale_y_continuous(labels = scales::comma) 
+
+grafico_5
+
+```
+
+## 7.3.Pirámide poblacional
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+url <- 'https://www.populationpyramid.net/api/pp/724/2023/?csv=true'
+data <- read.csv(url)
+head(data)
+data <- data%>%
+  pivot_longer(names_to = 'Gender', values_to = 'Population', cols = 2:3) %>%
+  mutate(PopPerc=case_when(Gender=='M'~round(Population/sum(Population)*100,2),
+                           TRUE~-round(Population/sum(Population)*100,2)),
+         signal=case_when(Gender=='M'~1,
+                          TRUE~-1))
+head(data)
+levels(data$Age)
+data$Age <- factor(data$Age,levels=unique(data$Age),ordered=TRUE)
+
+grafico_6<-ggplot(data)+
+  geom_bar(aes(x=Age,y=PopPerc,fill=Gender),stat='identity')+
+  geom_text(aes(x=Age,y=PopPerc+signal*.3,label=abs(PopPerc)))+
+  coord_flip()+
+  scale_fill_manual(name='',values=c('darkred','steelblue'))+
+  scale_y_continuous(breaks=seq(-10,10,1),
+                     labels=function(x){paste(abs(x),'%')})+
+  labs(x='',y='Población (%)',
+       title='Pirámide poblacional de España',
+       subtitle=paste('Población residente en 2023', format(sum(data$Population),big.mark='.')),
+       caption='Fuente: Elaboración propia a partir de datos de PopulationPyramid.net')+
+  cowplot::theme_cowplot()+
+  theme(axis.text.x=element_text(vjust=.5),
+        panel.grid.major.y = element_line(color='lightgray',linetype='dashed'),
+        legend.position = 'top',
+        legend.justification = 'center')
+
+ggplotly(grafico_6)
+
+```
+
+
+# 8.Tasa de desempleo por región y estudio cursado
+
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+
+Insercion_merc_laboral <- read.px("datos/Insercion_en_2019_de_graduados_en_2014.px") %>% as.data.frame()
+
+nombres_reemplazo <- c(
+  "Formación de docentes de enseñanza infantil" = "Enseñanza infantil",
+  "Ciencias sociales y del comportamiento (Otros estudios)" = "C_Sociales",
+  "Formación de docentes de enseñanza primaria" = "Enseñanza primaria",
+  "Técnicas audiovisuales y medios de comunicación" = "Teleco",
+  "Educación (Otros estudios)" = "Otra educacion",
+  "Artes (Otros estudios)" = "Otras artes",
+  "Actividades físicas y deportivas" = "Deporte",
+  "Agricultura y ganadería" = "Agricultura",
+  "Arquitectura y construcción" = "Arquitectura",
+  "Ciencias químicas, físicas y geológicas" = "Ciencias fisicas",
+  "Dirección y administración" = "Administracion",
+  "Industria manufacturera y producción" = "Industria",
+  "Ingeniería y profesiones afines" = "Ingenieria",
+  "Matemáticas y estadística" = "Mates",
+  "Negocios y administración (Otros estudios)" = "Negocios",
+  "Periodismo y documentación" = "Periodismo",
+  "Salud (Otros estudios)" = "Salud",
+  "Servicios (Otros estudios)" = "Servicios",
+  "Viajes, turismo y ocio" = "Turismo",
+  "02 - ARTES Y HUMANIDADES" = "02 - ARTES",
+  "03 - CIENCIAS SOCIALES, PERIODISMO Y DOCUMENTACIÓN" = "03 - C_SOCIALES",
+  "04 - NEGOCIOS, ADMINISTRACIÓN Y DERECHO" = "04 - NEGOCIOS",
+  "07 - INGENIERÍA, INDUSTRIA Y CONSTRUCCIÓN" = "07 - INGENIERIA",
+  "08 - AGRICULTURA, GANADERÍA, SILVICULTURA, PESCA Y VETERINARIA" = "08 - AGRICULTURA",
+  "TOTAL" = "Promedio",
+  "09 - SALUD Y SERVICIOS SOCIALES" = "09 - SALUD")
+
+replace_patterns <- function(text, patterns) {
+  for (original in names(patterns)) {
+    text <- gsub(original, patterns[original], text, fixed = TRUE)
+  }
+  return(text)
+}
+
+df_insercion_corregido <- Insercion_merc_laboral %>%
+  mutate(Ámbito.de.estudio = map_chr(Ámbito.de.estudio, replace_patterns, nombres_reemplazo))
+
+
+# Suponiendo que tu data frame se llama df
+# y la primera columna se llama "Columna1"
+
+# Filtrar las filas que contienen "Tasa de paro" en la primera columna
+df_paro <- df_insercion_corregido[df_insercion_corregido$Tasas.de.actividad..empleo.y.paro == "Tasa de paro" & df_insercion_corregido$value != 0, ] 
+
+
+# Calcular el valor máximo de 'value' para cada 'Cat_principal' único
+df_paro_max <- df_paro %>%
+  mutate(Cat_principal = ifelse(Ámbito.de.estudio == "Promedio", "11 - MEDIA", 
+                                ifelse(grepl("^[0-9]+ -", Ámbito.de.estudio), Ámbito.de.estudio, NA))) %>%
+  mutate(Ámbito.de.estudio = ifelse(grepl("^[0-9]+ -", Ámbito.de.estudio), 
+                                    paste0(sub(" -.*", "", Ámbito.de.estudio), "_media"), 
+                                    Ámbito.de.estudio)) %>%
+  fill(Cat_principal, .direction = "down") %>%
+  # Extraer la parte numérica de Cat_principal y convertirla a numérico
+  mutate(Cat_principal_num = as.numeric(str_extract(Cat_principal, "^[0-9]+"))) %>%
+  # Ordenar por la columna numérica
+  arrange(Cat_principal_num)
+df_paro_max <- na.omit(df_paro_max)
+
+# Inicializar un DataFrame vacío para almacenar los resultados
+valores_maximos <- data.frame(Cat_principal = character(), 
+                              CCAA.de.su.universidad = character(), 
+                              max_value = numeric(), 
+                              stringsAsFactors = FALSE)
+
+# Asegurarse de que los nombres de las columnas son correctos
+lista_df <- split(df_paro_max, list(df_paro_max$Cat_principal, df_paro_max$CCAA.de.su.universidad))
+
+# Calcular el valor máximo para cada combinación de 'Cat_principal' y 'CCAA.de.su.universidad'
+for (i in seq_along(lista_df)) {
+  if (nrow(lista_df[[i]]) > 0) {  # Solo si hay filas en el dataframe
+    max_value <- max(lista_df[[i]]$value, na.rm = TRUE)
+    if (!is.infinite(max_value)) {  # Solo si hay un valor máximo finito
+      cat_principal <- lista_df[[i]]$Cat_principal[1]  # Tomar el primer valor
+      ccaa_estudio <- lista_df[[i]]$CCAA.de.su.universidad[1]  # Tomar el primer valor
+      valores_maximos <- rbind(valores_maximos, data.frame(Cat_principal = cat_principal,
+                                                           CCAA.de.su.universidad = ccaa_estudio,
+                                                           max_value = max_value))
+    }
+  }
+}
+
+# Asumiendo que df_nacion y valores_maximos ya están definidos y preparados correctamente
+# Unir valores_maximos con df_nacion para agregar la columna max_value
+df_max_value <- df_paro_max %>%
+  left_join(valores_maximos, by = c("Cat_principal", "CCAA.de.su.universidad")) %>%
+  mutate(max_value = ifelse(value == max_value, max_value, NA))
+
+df_max_value <- df_max_value %>%
+  mutate(Ámbito.de.estudio = ifelse(Ámbito.de.estudio == "06_media", "Informatica", Ámbito.de.estudio)) 
+
+# Crear df_media filtrando tanto "media" como "Informatica como Promedio"
+df_medias <- df_max_value %>%
+  filter(str_detect(Ámbito.de.estudio, "media|Informatica|Promedio")) %>%
+  select(-max_value)
+
+df_sin_medias <- df_max_value %>%
+  filter(!(Ámbito.de.estudio %in% df_medias$Ámbito.de.estudio) | Ámbito.de.estudio == "Informatica" | Ámbito.de.estudio == "Promedio")
+
+df_sin_medias <- df_sin_medias %>%
+  arrange(Cat_principal, CCAA.de.su.universidad, desc(value)) %>%
+  group_by(Cat_principal, CCAA.de.su.universidad) %>%
+  mutate(next_value = lead(value, default = 0),
+         next_cat = lead(Cat_principal),
+         next_ccaa = lead(CCAA.de.su.universidad),
+         next_lower_value = ifelse(Cat_principal == next_cat & CCAA.de.su.universidad == next_ccaa, next_value, NA)) %>%
+  mutate(next_lower_value = ifelse(is.na(next_lower_value), 0, next_lower_value)) %>%
+  mutate(segment_start = next_lower_value,
+         segment_end = value) %>%
+  ungroup() %>%
+  select(-next_value, -next_cat, -next_ccaa) # Eliminar las columnas temporales
+
+
+```
+
+En este caso, hemos obtenido los datos de un estudio sobre el desempleo realizado a estudiantes que finalizaron su carrera en 2014. Se evaluó si tenían un puesto de empleo en el año 2019. Por desgracia, queríamos realizar otros análisis con los datos, pero, como observaréis, faltan datos en muchas ocasiones. Esto se debe a que el estudio no ha sido homogéneo en todas las ocasiones y, a veces, se han agrupado diversas carreras en una sola.
+
+Aunque ya es un poco tarde para cambiar de carrera, os dejo unos datos curiosos para que podáis jugar con las gráficas e ir observando/comparando los estudios (quizás alguien decida hacer otro grado o necesite elegir entre másteres muy diversos):
+
+Los estudios con más desempleados han sido: Extremadura en la carrera de Turismo con un 36,1%, la rama de estudios con más paro, 33,1%, a nivel nacional en las carreras de humanidades, y en la Comunidad Valenciana, Silvicultura.
+
+Mientras que los estudios con menos desempleados han sido: Enfermería en Cataluña, la que menos paro tiene con un 0,7%, y la rama con menos paro es Salud en Baleares con un 0,8%. A nivel nacional, la carrera de Medicina y, en la Comunidad Valenciana, la carrera de Informática.
+
+Una curiosidad es que las apariencias engañan, ya que en Canarias, Turismo tiene una de las tasas más altas de desempleo, así que no os fiéis.
+
+Como norma general, se observa que las carreras de salud e informática son las que menos desempleados tienen, mientras que las de humanidades y artes son las que más suelen tener. Una buena noticia es que Economía es de las que más empleabilidad tiene (aunque os animo a enfocaros hacia la tecnología/digitalización, donde hay aún menos desempleo).
+
+
+::: panel-tabset
+### España
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_nacion <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Total nacional")
+df_medias_nacion <- df_medias %>% filter(CCAA.de.su.universidad == "Total nacional")
+
+# Convertir Cat_principal a un factor ordenado
+df_sin_medias_nacion$Cat_principal <- fct_inorder(df_sin_medias_nacion$Cat_principal)
+df_medias_nacion$Cat_principal <- fct_inorder(df_medias_nacion$Cat_principal)
+
+p_paro_nacion <- ggplot() +
+  geom_rect(data = df_sin_medias_nacion, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                             xmax = as.numeric(Cat_principal) + 0.4, 
+                                             ymin = segment_start, 
+                                             ymax = segment_end, fill = segment_end, 
+                                             alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_nacion, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_nacion, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_nacion$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_nacion
+
+```
+
+### Andalucía
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Andalucia <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Andalucía")
+df_medias_Andalucia <- df_medias %>% filter(CCAA.de.su.universidad == "Andalucía")
+
+df_sin_medias_Andalucia$Cat_principal <- fct_inorder(df_sin_medias_Andalucia$Cat_principal)
+df_medias_Andalucia$Cat_principal <- fct_inorder(df_medias_Andalucia$Cat_principal)
+
+p_paro_Andalucia <- ggplot() +
+  geom_rect(data = df_sin_medias_Andalucia, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                xmax = as.numeric(Cat_principal) + 0.4, 
+                                                ymin = segment_start, 
+                                                ymax = segment_end, fill = segment_end, 
+                                                alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Andalucia, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Andalucia, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Andalucia$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Andalucia
+```
+
+### Aragon
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Aragon <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Aragón")
+df_medias_Aragon <- df_medias %>% filter(CCAA.de.su.universidad == "Aragón")
+
+df_sin_medias_Aragon$Cat_principal <- fct_inorder(df_sin_medias_Aragon$Cat_principal)
+df_medias_Aragon$Cat_principal <- fct_inorder(df_medias_Aragon$Cat_principal)
+
+p_paro_Aragon <- ggplot() +
+  geom_rect(data = df_sin_medias_Aragon, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                             xmax = as.numeric(Cat_principal) + 0.4, 
+                                             ymin = segment_start, 
+                                             ymax = segment_end, fill = segment_end, 
+                                             alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Aragon, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Aragon, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Aragon$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Aragon
+```
+
+### Asturias
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Asturias <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Asturias, Principado de")
+df_medias_Asturias <- df_medias %>% filter(CCAA.de.su.universidad == "Asturias, Principado de")
+
+df_sin_medias_Asturias$Cat_principal <- fct_inorder(df_sin_medias_Asturias$Cat_principal)
+df_medias_Asturias$Cat_principal <- fct_inorder(df_medias_Asturias$Cat_principal)
+
+p_paro_Asturias <- ggplot() +
+  geom_rect(data = df_sin_medias_Asturias, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                               xmax = as.numeric(Cat_principal) + 0.4, 
+                                               ymin = segment_start, 
+                                               ymax = segment_end, fill = segment_end, 
+                                               alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Asturias, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Asturias, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Asturias$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Asturias
+```
+
+### Baleares
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Baleares <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Balears, Illes")
+df_medias_Baleares <- df_medias %>% filter(CCAA.de.su.universidad == "Balears, Illes")
+
+df_sin_medias_Baleares$Cat_principal <- fct_inorder(df_sin_medias_Baleares$Cat_principal)
+df_medias_Baleares$Cat_principal <- fct_inorder(df_medias_Baleares$Cat_principal)
+
+p_paro_Baleares <- ggplot() +
+  geom_rect(data = df_sin_medias_Baleares, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                               xmax = as.numeric(Cat_principal) + 0.4, 
+                                               ymin = segment_start, 
+                                               ymax = segment_end, fill = segment_end, 
+                                               alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Baleares, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Baleares, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Baleares$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Baleares
+```
+
+### Canarias
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Canarias <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Canarias")
+df_medias_Canarias <- df_medias %>% filter(CCAA.de.su.universidad == "Canarias")
+
+df_sin_medias_Canarias$Cat_principal <- fct_inorder(df_sin_medias_Canarias$Cat_principal)
+df_medias_Canarias$Cat_principal <- fct_inorder(df_medias_Canarias$Cat_principal)
+
+p_paro_Canarias <- ggplot() +
+  geom_rect(data = df_sin_medias_Canarias, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                               xmax = as.numeric(Cat_principal) + 0.4, 
+                                               ymin = segment_start, 
+                                               ymax = segment_end, fill = segment_end, 
+                                               alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Canarias, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Canarias, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Canarias$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Canarias
+```
+
+### Cantabria
+
+```{r}
+#| code-fold: true
+#| warning: false
+
+df_sin_medias_Cantabria <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Cantabria")
+df_medias_Cantabria <- df_medias %>% filter(CCAA.de.su.universidad == "Cantabria")
+
+df_sin_medias_Cantabria$Cat_principal <- fct_inorder(df_sin_medias_Cantabria$Cat_principal)
+df_medias_Cantabria$Cat_principal <- fct_inorder(df_medias_Cantabria$Cat_principal)
+
+p_paro_Cantabria <- ggplot() +
+  geom_rect(data = df_sin_medias_Cantabria, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                xmax = as.numeric(Cat_principal) + 0.4, 
+                                                ymin = segment_start, 
+                                                ymax = segment_end, fill = segment_end, 
+                                                alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Cantabria, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Cantabria, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Cantabria$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Cantabria
+```
+
+### C.León
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_C_y_Leon <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Castilla y León")
+df_medias_C_y_Leon <- df_medias %>% filter(CCAA.de.su.universidad == "Castilla y León")
+
+df_sin_medias_C_y_Leon$Cat_principal <- fct_inorder(df_sin_medias_C_y_Leon$Cat_principal)
+df_medias_C_y_Leon$Cat_principal <- fct_inorder(df_medias_C_y_Leon$Cat_principal)
+
+p_paro_C_y_Leon <- ggplot() +
+  geom_rect(data = df_sin_medias_C_y_Leon, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                               xmax = as.numeric(Cat_principal) + 0.4, 
+                                               ymin = segment_start, 
+                                               ymax = segment_end, fill = segment_end, 
+                                               alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_C_y_Leon, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_C_y_Leon, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_C_y_Leon$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_C_y_Leon
+```
+
+### La Mancha
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_C_La_Mancha <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Castilla - La Mancha")
+df_medias_C_La_Mancha <- df_medias %>% filter(CCAA.de.su.universidad == "Castilla - La Mancha")
+
+df_sin_medias_C_La_Mancha$Cat_principal <- fct_inorder(df_sin_medias_C_La_Mancha$Cat_principal)
+df_medias_C_La_Mancha$Cat_principal <- fct_inorder(df_medias_C_La_Mancha$Cat_principal)
+
+p_paro_C_La_Mancha <- ggplot() +
+  geom_rect(data = df_sin_medias_C_La_Mancha, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                  xmax = as.numeric(Cat_principal) + 0.4, 
+                                                  ymin = segment_start, 
+                                                  ymax = segment_end, fill = segment_end, 
+                                                  alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_C_La_Mancha, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_C_La_Mancha, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_C_La_Mancha$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_C_La_Mancha
+```
+
+### Cataluña
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Catalunya <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Cataluña")
+df_medias_Catalunya <- df_medias %>% filter(CCAA.de.su.universidad == "Cataluña")
+
+df_sin_medias_Catalunya$Cat_principal <- fct_inorder(df_sin_medias_Catalunya$Cat_principal)
+df_medias_Catalunya$Cat_principal <- fct_inorder(df_medias_Catalunya$Cat_principal)
+
+p_paro_Catalunya <- ggplot() +
+  geom_rect(data = df_sin_medias_Catalunya, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                xmax = as.numeric(Cat_principal) + 0.4, 
+                                                ymin = segment_start, 
+                                                ymax = segment_end, fill = segment_end, 
+                                                alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Catalunya, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Catalunya, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Catalunya$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Catalunya
+```
+
+### C.Valenciana
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_C_Valenciana <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Comunitat Valenciana")
+df_medias_C_Valenciana <- df_medias %>% filter(CCAA.de.su.universidad == "Comunitat Valenciana")
+
+df_sin_medias_C_Valenciana$Cat_principal <- fct_inorder(df_sin_medias_C_Valenciana$Cat_principal)
+df_medias_C_Valenciana$Cat_principal <- fct_inorder(df_medias_C_Valenciana$Cat_principal)
+
+p_paro_C_Valenciana <- ggplot() +
+  geom_rect(data = df_sin_medias_C_Valenciana, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                   xmax = as.numeric(Cat_principal) + 0.4, 
+                                                   ymin = segment_start, 
+                                                   ymax = segment_end, fill = segment_end, 
+                                                   alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_C_Valenciana, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_C_Valenciana, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_C_Valenciana$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_C_Valenciana
+```
+
+### Extremadura
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Extremadura <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Extremadura")
+df_medias_Extremadura <- df_medias %>% filter(CCAA.de.su.universidad == "Extremadura")
+
+df_sin_medias_Extremadura$Cat_principal <- fct_inorder(df_sin_medias_Extremadura$Cat_principal)
+df_medias_Extremadura$Cat_principal <- fct_inorder(df_medias_Extremadura$Cat_principal)
+
+p_paro_Extremadura <- ggplot() +
+  geom_rect(data = df_sin_medias_Extremadura, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                                  xmax = as.numeric(Cat_principal) + 0.4, 
+                                                  ymin = segment_start, 
+                                                  ymax = segment_end, fill = segment_end, 
+                                                  alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Extremadura, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Extremadura, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Extremadura$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Extremadura
+```
+
+### Galicia
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Galicia <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Galicia")
+df_medias_Galicia <- df_medias %>% filter(CCAA.de.su.universidad == "Galicia")
+
+df_sin_medias_Galicia$Cat_principal <- fct_inorder(df_sin_medias_Galicia$Cat_principal)
+df_medias_Galicia$Cat_principal <- fct_inorder(df_medias_Galicia$Cat_principal)
+
+p_paro_Galicia <- ggplot() +
+  geom_rect(data = df_sin_medias_Galicia, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                              xmax = as.numeric(Cat_principal) + 0.4, 
+                                              ymin = segment_start, 
+                                              ymax = segment_end, fill = segment_end, 
+                                              alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Galicia, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Galicia, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Galicia$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Galicia
+```
+
+### Madrid
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Madrid <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Madrid, Comunidad de")
+df_medias_Madrid <- df_medias %>% filter(CCAA.de.su.universidad == "Madrid, Comunidad de")
+
+df_sin_medias_Madrid$Cat_principal <- fct_inorder(df_sin_medias_Madrid$Cat_principal)
+df_medias_Madrid$Cat_principal <- fct_inorder(df_medias_Madrid$Cat_principal)
+
+p_paro_Madrid <- ggplot() +
+  geom_rect(data = df_sin_medias_Madrid, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                             xmax = as.numeric(Cat_principal) + 0.4, 
+                                             ymin = segment_start, 
+                                             ymax = segment_end, fill = segment_end, 
+                                             alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Madrid, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Madrid, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Madrid$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Madrid
+```
+
+### Murcia
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Murcia <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Murcia, Región de")
+df_medias_Murcia <- df_medias %>% filter(CCAA.de.su.universidad == "Murcia, Región de")
+
+df_sin_medias_Murcia$Cat_principal <- fct_inorder(df_sin_medias_Murcia$Cat_principal)
+df_medias_Murcia$Cat_principal <- fct_inorder(df_medias_Murcia$Cat_principal)
+
+p_paro_Murcia <- ggplot() +
+  geom_rect(data = df_sin_medias_Murcia, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                             xmax = as.numeric(Cat_principal) + 0.4, 
+                                             ymin = segment_start, 
+                                             ymax = segment_end, fill = segment_end, 
+                                             alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Murcia, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Murcia, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Murcia$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Murcia
+```
+
+### Navarra
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Navarra <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Navarra, Comunidad Foral de")
+df_medias_Navarra <- df_medias %>% filter(CCAA.de.su.universidad == "Navarra, Comunidad Foral de")
+
+df_sin_medias_Navarra$Cat_principal <- fct_inorder(df_sin_medias_Navarra$Cat_principal)
+df_medias_Navarra$Cat_principal <- fct_inorder(df_medias_Navarra$Cat_principal)
+
+p_paro_Navarra <- ggplot() +
+  geom_rect(data = df_sin_medias_Navarra, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                              xmax = as.numeric(Cat_principal) + 0.4, 
+                                              ymin = segment_start, 
+                                              ymax = segment_end, fill = segment_end, 
+                                              alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Navarra, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Navarra, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Navarra$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Navarra
+```
+
+### P.Vasco
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_P_Vasco <- df_sin_medias %>% filter(CCAA.de.su.universidad == "País Vasco")
+df_medias_P_Vasco <- df_medias %>% filter(CCAA.de.su.universidad == "País Vasco")
+
+df_sin_medias_P_Vasco$Cat_principal <- fct_inorder(df_sin_medias_P_Vasco$Cat_principal)
+df_medias_P_Vasco$Cat_principal <- fct_inorder(df_medias_P_Vasco$Cat_principal)
+
+p_paro_P_Vasco <- ggplot() +
+  geom_rect(data = df_sin_medias_P_Vasco, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                              xmax = as.numeric(Cat_principal) + 0.4, 
+                                              ymin = segment_start, 
+                                              ymax = segment_end, fill = segment_end, 
+                                              alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_P_Vasco, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_P_Vasco, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_P_Vasco$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_P_Vasco
+```
+
+### Rioja
+
+```{r}
+#| code-fold: true
+#| warning: false
+df_sin_medias_Rioja <- df_sin_medias %>% filter(CCAA.de.su.universidad == "Rioja, La")
+df_medias_Rioja <- df_medias %>% filter(CCAA.de.su.universidad == "Rioja, La")
+
+df_sin_medias_Rioja$Cat_principal <- fct_inorder(df_sin_medias_Rioja$Cat_principal)
+df_medias_Rioja$Cat_principal <- fct_inorder(df_medias_Rioja$Cat_principal)
+
+p_paro_Rioja <- ggplot() +
+  geom_rect(data = df_sin_medias_Rioja, aes(xmin = as.numeric(Cat_principal) - 0.4, 
+                                            xmax = as.numeric(Cat_principal) + 0.4, 
+                                            ymin = segment_start, 
+                                            ymax = segment_end, fill = segment_end, 
+                                            alpha = Cat_principal), stat = "identity") +  # Mapea alpha a Cat_principal
+  scale_alpha_discrete(range = c(1, 1), name = "Categoría de estudios") +  # Esto hace que alpha sea constante, pero aún crea la leyenda
+  geom_point(data = df_medias_Rioja, aes(x = as.numeric(Cat_principal), y = value), color = "black", size = 3) +
+  geom_text(data = df_sin_medias_Rioja, aes(x = as.numeric(Cat_principal), y = value, label = Ámbito.de.estudio), 
+            size = 3) +
+  scale_fill_gradientn(colours = brewer.pal(8, "Set2"), name = "Escala de colores") +
+  labs(title = "Tasa de paro según el estudio cursado",
+       x = "Categoría y subcategoría de estudios",
+       y = "Tasa de paro (%)") +
+  scale_x_continuous(breaks = as.numeric(unique(df_sin_medias_Rioja$Cat_principal)), labels = function(x) substr(x, 1, 2)) +
+  theme_minimal() +
+  theme(legend.position="right")  # Coloca la leyenda en la derecha
+p_paro_Rioja
+```
+
+### Procedimiento
+
+Este ha sido un auténtico quebradero de cabeza. Empezar por este quizás haya sido la peor de las decisiones, ya que algo que parecía sencillo se ha convertido en uno de los gráficos más complicados que seguramente se verán este año.
+
+En primer lugar, hemos tenido que reemplazar a mano gran parte de los datos en texto, pues era esencial para que el gráfico fuera legible. Pero, debido a cómo estaban escritos los datos (seguramente por algún acento y paréntesis), he tenido que reconvertir el texto con 'replace_patterns'. De esta forma, los datos ya estaban cambiados y hemos aprovechado para eliminar los valores que eran 0, ya que son equivalentes a NA.
+
+En segundo lugar, hemos creado una categoría nueva, pues la principal estaba junto a las subcategorías en la misma columna. También tuvimos que eliminar las subcategorías de su celda original, pero manteniendo de momento las celdas con '\_media' y ordenando las 'c_principales' de forma ascendente. Tuvimos que crear una nueva columna con los números de las 'c_principales' para que el eje y tuviera un orden numérico.
+
+En tercer lugar, obtuvimos un df con las columnas vacías para posteriormente calcular el valor máximo para cada combinación de 'c_principal' y 'CC.AA.' (ya que esta era la parte superior de las barras). Después, hubo que crear un 'df_medias' (pues eran las celdas de 'c_principales' originalmente) y un 'df_sin medias' donde está realmente este trabajo.
+
+En cuarto lugar, hubo que conseguir para los valores normales la diferencia entre su valor y el inferior siguiente dentro de la misma categoría, logrando que el valor más inferior buscara el 0, ya que no había valores inferiores.
+
+Una vez todo conseguido, pudimos separar los datos por comunidad, creando un gráfico de barras para cada una. Pero la creación del gráfico no fue sencilla: tuvimos que crear mediante 'geom_rect' las porciones de cada barra para que cambiase de color la barra cada vez que había un valor nuevo. De lo contrario, se sumaban todos los valores. Intentamos utilizar 'geom_text_repel' para que se vieran mejor los nombres, pero no funcionó seguramente por algún tipo de alteración en los datos. También utilizamos el 'df_medias' para añadir los puntos y una paleta de colores difuminada para que se vieran los cambios en cada barra, y esta última parte del código para cada comunidad.
+:::
+
+# 9.Conclusiones
+
+Tras realizar este trabajo hemos observado el contexto por el cuál atravesanmos principalmente los jovenes en España, el cuál tras las crisis inmobiliaria no es muy alagüeño, pues existen elevada tasas de desempleo, unos precios de las viviendas cada vez mayores y muchos otros retos.
+
+Sin embargo la tecnología puede permitirnos ser más competitivos, tener mayores oportunidades, mejorar la calidad de aquello que hacemos... Y el ejemplo perfecto es R, una herramienta que apenas hemos utilizado en toda la carrera, pero que tras meses de arduo esfuerzo y múltiples cabreos. Podemos observar como nos ofrece una amplia gama de posibilidades casi infinitas dentro del mundo digital cada vez más importante.
+
+Es por todo ello que hemos decidido incluir este video para que podais reflexionar sobre donde está el límite y que sin obviar el contexto que enfrentamos podamos tener una mayor motivación a la hora de enfrentar los problemas y retos que se nos vayan a presentar.
+
+```{r}
+#| echo = FALSE,
+#| out.width = "100%"
+embed_url("https://www.youtube.com/watch?v=lOpURpczCFU")
+```
+
+Mucho ánimo con todo aquello a lo que dediqueis horas de esfuerzo y sudor
+
+
+<br>
+
+### Información sobre la sesión
+
+Abajo muestro mi entorno de trabajo y paquetes utilizados
+
+```{r}
+#| echo: false
+sessioninfo::session_info() %>% 
+  details::details(summary = 'current session info') 
+```
+
+-------------------------------------------------------------------------

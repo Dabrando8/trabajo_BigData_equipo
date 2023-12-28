@@ -1,0 +1,46 @@
+AXIS-VERSION="2006";
+CREATION-DATE="20231215";
+CHARSET="ANSI";
+SUBJECT-AREA="Resultados por comunidades autónomas";
+SUBJECT-CODE="null";
+MATRIX="0210006";
+TITLE="Personas sin hogar según las razones para abandonar el alojamiento que tenían antes de verse sin hogar por comunidad autónoma de ubicación del centro";
+CONTENTS="Personas sin hogar según las razones para abandonar el alojamiento que tenían antes de verse sin hogar";
+CODEPAGE="iso-8859-15";
+DESCRIPTION="";
+COPYRIGHT=YES;
+NOTE="1) Durante los primeros meses de 2022 la frontera terrestre con Marruecos est"
+"uvo cerrada. Esta circunstancia afectó al número de personas que acudieron a "
+"los centros de atención a personas sin hogar de Melilla.";
+DECIMALS=1;
+SHOWDECIMALS=1;
+STUB="Comunidades y Ciudades Autónomas de ubicación del centro";
+HEADING="Razones para abandonar el alojamiento";
+VALUES("Comunidades y Ciudades Autónomas de ubicación del centro")="Total Nacional","01 Andalucía","02 Aragón","03 Asturias, Principado de",
+"04 Balears, Illes","05 Canarias","06 Cantabria","07 Castilla y León",
+"08 Castilla - La Mancha","09 Cataluña","10 Comunitat Valenciana","11 Extremadura",
+"12 Galicia","13 Madrid, Comunidad de","14 Murcia, Región de",
+"15 Navarra, Comunidad Foral de","16 País Vasco","17 Rioja, La","18 Ceuta",
+"19 Melilla";
+VALUES("Razones para abandonar el alojamiento")="Total","Por separación de la pareja",
+"Por haber sufrido violencia él/ella o sus hijos",
+"Porque el edificio donde vivía estaba en ruinas",
+"Porque le desahuciaron de la vivienda",
+"Porque se le acabó el contrato de alquiler","Porque perdió el trabajo",
+"Por hospitalización","Porque estuvo privado de libertad",
+"Porque cambió de localidad","Porque no pudo pagar más el alojamiento",
+"Por tener que empezar de cero tras emigrar a otro país",
+"Por problemas de adicción","Por salida o abandono de un centro de menores",
+"Otras causas";
+CODES("Comunidades y Ciudades Autónomas de ubicación del centro")="CA00","CA01","CA02","CA03","CA04","CA05","CA06","CA07","CA08","CA09","CA10","CA11","CA12",
+"CA13","CA14","CA15","CA16","CA17","CA18","CA19";
+MAP("Comunidades y Ciudades Autónomas de ubicación del centro")="spain_regions_img_ind";
+SOURCE="Instituto Nacional de Estadística";
+UNITS="porcentaje";
+DATA=100.0 14.1 9.6 2.5 16.1 8.0 26.8 11.1 7.2 9.6 14.7 28.8 12.6 2.7 15.2 100.0 19.3 11.1 3.0 15.6 12.2 36.7 14.8 4.6 14.7 14.2 22.3 14.1 5.4 11.3 100.0 20.6 5.5 6.8 16.7 10.4 48.6 20.5 5.3 15.7 37.8 19.2 6.9 3.2 16.5 100.0 10.3 14.9 1.3 18.7
+ 4.6 17.2 8.1 15.6 7.4 19.9 19.7 18.9 3.8 24.3 100.0 4.1 5.6 1.6 20.1 3.6 12.3 11.8 7.5 1.4 10.5 2.3 10.7 0.0 26.1 100.0 28.7 21.5 3.7 17.6 4.4 9.4 5.9 16.6 12.5 15.9 12.4 18.5 4.1 13.7 100.0 13.9 7.1 0.0 9.2 5.7 37.8 6.5 8.2 3.1
+ 3.7 3.3 23.7 0.4 13.9 100.0 9.8 11.7 0.0 10.1 0.0 19.8 4.5 7.6 21.0 12.0 31.8 19.4 1.2 17.0 100.0 7.3 16.4 1.3 9.8 23.4 45.9 5.5 4.9 10.7 21.6 46.1 7.2 1.7 7.0 100.0 18.4 5.7 2.0 32.2 15.8 26.9 17.1 5.2 5.5 14.2 17.6 13.4 1.2 18.4
+ 100.0 17.0 15.2 2.1 29.7 6.1 36.9 15.7 6.9 13.5 30.3 21.2 17.6 3.8 18.6 100.0 21.8 7.3 7.3 10.9 14.6 29.1 14.6 7.3 7.3 32.8 0.0 44.8 0.0 4.2 100.0 8.0 4.8 2.9 9.3 0.7 23.0 6.0 6.9 9.2 17.2 20.4 9.0 0.6 11.9 100.0 16.5 13.6 3.9 17.3
+ 12.6 40.7 15.3 10.8 9.2 22.1 37.9 15.4 2.2 8.0 100.0 6.3 9.9 4.1 30.6 8.6 19.6 11.2 4.3 6.8 4.1 46.1 11.8 1.5 4.3 100.0 2.6 4.0 2.6 43.9 13.3 14.1 2.6 0.0 0.0 0.0 12.3 0.0 0.0 20.5 100.0 9.7 6.1 0.8 8.9 2.9 11.2 8.0 5.3 3.2
+ 3.9 46.2 4.5 3.7 24.4 100.0 0.0 9.1 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.1 63.6 0.0 0.0 54.5 100.0 2.3 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 95.7 0.0 0.0 0.0 100.0 7.5 13.3 11.1 9.7 6.6 12.1 0.0 34.6 3.3 9.5 47.8 0.5 0.0 0.0
+;

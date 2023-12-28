@@ -1,0 +1,72 @@
+AXIS-VERSION="2006";
+CREATION-DATE="20231215";
+CHARSET="ANSI";
+SUBJECT-AREA="Características de los graduados universitarios del curso 2013-2014. Cifras ab";
+SUBJECT-CODE="null";
+MATRIX="01001";
+TITLE="Graduados universitarios por titulación y sexo";
+CONTENTS="Graduados universitarios";
+CODEPAGE="iso-8859-15";
+DESCRIPTION="";
+COPYRIGHT=YES;
+NOTE="1) Los titulados en más de una titulación se han contabilizado una vez en cad"
+"a una de las titulaciones que ha obtenido.##";
+DECIMALS=0;
+SHOWDECIMALS=0;
+STUB="Titulación";
+HEADING="Sexo";
+VALUES("Titulación")="TOTAL","01 - EDUCACIÓN","Pedagogía","Educación infantil","Educación primaria",
+"Otros maestros","Educación social","02 - ARTES Y HUMANIDADES",
+"Audiovisual, imagen y multimedia","Diseño","Bellas artes","Historia del arte",
+"Conservación y restauración","Música y Artes escénicas","Arqueología","Historia",
+"Filosofía","Humanidades","Lengua inglesa","Lenguas clásicas",
+"Otras lenguas extranjeras","Traducción e interpretación",
+"Lenguas y dialectos españoles","Literatura","Lenguas modernas y aplicadas",
+"03 - CIENCIAS SOCIALES, PERIODISMO Y DOCUMENTACIÓN","Economía",
+"Política y gestión pública","Relaciones internacionales","Psicología",
+"Antropología social y cultural y Estudios y gestión de la cultura",
+"Criminología","Geografía","Sociología e Igualdad de género","Comunicación",
+"Periodismo","Información y documentación",
+"04 - NEGOCIOS, ADMINISTRACIÓN Y DERECHO","Financiera y actuarial",
+"Finanzas y contabilidad","Administración y empresa","Ciencias del trabajo",
+"Gestión y administración pública","Marketing","Protocolo y eventos",
+"Publicidad y relaciones públicas","Comercio","Derecho","05 - CIENCIAS","Biología",
+"Bioquímica","Biotecnología","Biomedicina","Ciencias ambientales","Química",
+"Ciencias del mar","Geografía y ordenación del territorio","Geología","Física",
+"Matemáticas","Estadística","06 - INFORMÁTICA",
+"Desarrollo de software y de aplicaciones e Ingeniería multimedia","Informática",
+"07 - INGENIERÍA, INDUSTRIA Y CONSTRUCCIÓN",
+"Ingeniería química industrial e Ingeniería medioambiental",
+"Ingeniería de la energía","Ingeniería eléctrica","Ingeniería de computadores",
+"Ingeniería de sonido e imagen","Ingeniería de telecomunicación",
+"Ingeniería electrónica industrial y automática","Ingeniería en electrónica",
+"Ingeniería en diseño industrial y desarrollo del producto",
+"Ingeniería en tecnologías industriales","Ingeniería mecánica",
+"Ingeniería aeronáutica","Ingeniería naval y oceánica",
+"Ingeniería de organización industrial y Nanotecnología",
+"Ciencia y tecnología de los alimentos e Ingeniería alimentaria","Enología",
+"Ingeniería de materiales e Ingeniería textil","Ingeniería de minas y energía",
+"Arquitectura y Urbanismo y paisajismo",
+"Ingeniería geomática, topografía y cartografía","Arquitectura técnica",
+"Ingeniería civil",
+"08 - AGRICULTURA, GANADERÍA, SILVICULTURA, PESCA Y VETERINARIA",
+"Ingeniería agraria y agroalimentaria",
+"Ingeniería agrícola, agropecuaria y medio rural",
+"Ingeniería horticultura y jardinería","Ingeniería forestal y montes",
+"Veterinaria","09 - SALUD Y SERVICIOS SOCIALES","Odontología","Medicina",
+"Enfermería","Ingeniería biomédica y de la salud","Óptica y optometría",
+"Fisioterapia","Logopedia","Nutrición humana y dietética","Podología",
+"Terapia ocupacional","Farmacia","Trabajo social","10 - SERVICIOS",
+"Actividad física y del deporte","Turismo","Náutica y transporte marítimo",
+"Servicio de transporte terrestre y Servicio de transporte aéreo",
+"Servicios (otros estudios)";
+VALUES("Sexo")="Ambos sexos","Hombres","Mujeres";
+SOURCE="Instituto Nacional de Estadística";
+UNITS="personas";
+DATA=233626.0 96857.0 136769.0 41108.0 8169.0 32939.0 5025.0 824.0 4201.0 12644.0 761.0 11883.0 19624.0 5516.0 14108.0 1393.0 657.0 736.0 2422.0 411.0 2011.0 20216.0 7246.0 12970.0 2923.0 1312.0 1611.0 534.0 154.0 380.0 2750.0 898.0 1852.0 1541.0 418.0 1123.0 165.0 25.0 140.0 367.0 150.0 217.0 91.0 27.0 64.0 2853.0 1764.0 1089.0 809.0 453.0
+ 356.0 658.0 267.0 391.0 2368.0 571.0 1797.0 190.0 68.0 122.0 557.0 143.0 414.0 1917.0 367.0 1550.0 1990.0 502.0 1488.0 99.0 33.0 66.0 404.0 94.0 310.0 21241.0 7734.0 13507.0 4104.0 2191.0 1913.0 1426.0 744.0 682.0 133.0 46.0 87.0 8022.0 1743.0 6279.0 619.0 186.0 433.0 1335.0 673.0 662.0 256.0 174.0 82.0 831.0
+ 349.0 482.0 161.0 68.0 93.0 3870.0 1418.0 2452.0 484.0 142.0 342.0 48349.0 20658.0 27691.0 158.0 85.0 73.0 946.0 390.0 556.0 21463.0 10040.0 11423.0 4667.0 1614.0 3053.0 605.0 226.0 379.0 948.0 410.0 538.0 51.0 3.0 48.0 3154.0 905.0 2249.0 399.0 173.0 226.0 15958.0 6812.0 9146.0 12233.0 5422.0 6811.0 3585.0 1310.0 2275.0
+ 832.0 278.0 554.0 785.0 306.0 479.0 250.0 45.0 205.0 1864.0 899.0 965.0 1971.0 850.0 1121.0 212.0 86.0 126.0 366.0 237.0 129.0 374.0 211.0 163.0 914.0 657.0 257.0 840.0 449.0 391.0 240.0 94.0 146.0 6859.0 5777.0 1082.0 187.0 147.0 40.0 6672.0 5630.0 1042.0 38686.0 27151.0 11535.0 2132.0 1036.0 1096.0 141.0 88.0
+ 53.0 1686.0 1473.0 213.0 86.0 76.0 10.0 437.0 312.0 125.0 2335.0 1825.0 510.0 2525.0 2166.0 359.0 743.0 615.0 128.0 946.0 448.0 498.0 5091.0 3901.0 1190.0 3861.0 3289.0 572.0 1543.0 1170.0 373.0 553.0 433.0 120.0 1101.0 830.0 271.0 587.0 141.0 446.0 112.0 66.0 46.0 172.0 107.0 65.0 807.0 597.0 210.0 3841.0
+ 1925.0 1916.0 806.0 542.0 264.0 3849.0 2358.0 1491.0 5332.0 3753.0 1579.0 4033.0 2005.0 2028.0 417.0 213.0 204.0 1173.0 732.0 441.0 255.0 148.0 107.0 765.0 493.0 272.0 1423.0 419.0 1004.0 33181.0 8328.0 24853.0 1785.0 744.0 1041.0 5571.0 1751.0 3820.0 11700.0 2268.0 9432.0 106.0 43.0 63.0 797.0 229.0 568.0 3426.0 1367.0 2059.0
+ 631.0 44.0 587.0 884.0 159.0 725.0 433.0 147.0 286.0 711.0 79.0 632.0 2872.0 818.0 2054.0 4265.0 679.0 3586.0 7720.0 4367.0 3353.0 3866.0 3047.0 819.0 3360.0 936.0 2424.0 242.0 193.0 49.0 116.0 79.0 37.0 136.0 112.0 24.0;
